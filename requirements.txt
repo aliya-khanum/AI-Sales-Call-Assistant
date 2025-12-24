@@ -3,8 +3,5 @@ pydub
 speechrecognition
 textblob
 streamlit-mic-recorder
-vosk
-numpy
-pandas
 ffmpeg-python
-google-generativeai
+
