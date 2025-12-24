@@ -4,4 +4,4 @@ speechrecognition
 textblob
 streamlit-mic-recorder
 ffmpeg-python
-
+google-genai
