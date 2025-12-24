@@ -7,3 +7,4 @@ vosk
 numpy
 pandas
 ffmpeg-python
+google-generativeai
