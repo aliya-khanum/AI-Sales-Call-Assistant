@@ -101,13 +101,15 @@ def extract_entities(text):
     }
 
 # ===================================================================
-# GEMINI CORE LOGIC
+# GEMINI CORE LOGIC (Updated for Streamlit Cloud Stability)
 # ===================================================================
 def process_audio_with_gemini(filepath, api_key):
-    """Uses Gemini Multimodal to transcribe and diarize speakers."""
+    """Uses the new google-genai SDK for Multimodal Diarization."""
+    # Initialize the client inside the function for thread safety in Cloud
     client = genai.Client(api_key=api_key)
     
-    # Upload to Gemini File API using the correct 'file=' argument
+    # Upload to Gemini File API
+    # Note: Streamlit Cloud uses a Linux temp directory, ensure file path is clean
     uploaded_file = client.files.upload(file=filepath)
     
     prompt = """
@@ -117,41 +119,48 @@ def process_audio_with_gemini(filepath, api_key):
     3. Return a JSON list of objects with keys: "speaker" and "text".
     
     Example:
-    [{"speaker": "Sales Rep", "text": "Hello, how can I help?"}, {"speaker": "Customer", "text": "I am looking for a dress."}]
+    [{"speaker": "Sales Rep", "text": "Hello"}, {"speaker": "Customer", "text": "Hi"}]
     """
 
-    response = client.models.generate_content(
-        model=DEFAULT_MODEL,
-        contents=[prompt, uploaded_file],
-        config=types.GenerateContentConfig(response_mime_type="application/json")
-    )
-    
-    # Clean up file from cloud
-    client.files.delete(name=uploaded_file.name)
-    return json.loads(response.text)
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.0-flash", # Using 2.0 Flash (Stable for Client API)
+            contents=[prompt, uploaded_file],
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json"
+            )
+        )
+        
+        # Immediate cleanup of the uploaded file from Google Cloud
+        client.files.delete(name=uploaded_file.name)
+        
+        return json.loads(response.text)
+    except Exception as e:
+        # Cleanup even if it fails
+        client.files.delete(name=uploaded_file.name)
+        raise e
 
 def get_sales_guidance(turn_text, context_transcript, crm, api_key):
-    """Generates real-time suggestions based on the current customer turn."""
+    """Generates real-time coaching via Gemini."""
     client = genai.Client(api_key=api_key)
     
     prompt = f"""
-    You are a sales coach. Analyze this customer statement and the previous context.
+    You are a sales coach. Analyze this customer statement.
+    Customer: "{turn_text}"
+    Context: {context_transcript}
+    CRM: {json.dumps(crm)}
     
-    Customer Statement: "{turn_text}"
-    Recent Context: {context_transcript}
-    CRM Data: {json.dumps(crm)}
-    
-    Return JSON only:
+    Return JSON:
     {{
-      "follow_up": "Next question for the rep",
-      "objection": "How to handle hesitation",
-      "recommendation": "Product/Service to suggest",
-      "insight": "1-sentence psychological insight"
+      "follow_up": "...",
+      "objection": "...",
+      "recommendation": "...",
+      "insight": "..."
     }}
     """
     
     response = client.models.generate_content(
-        model=DEFAULT_MODEL,
+        model="gemini-2.0-flash",
         contents=prompt,
         config=types.GenerateContentConfig(response_mime_type="application/json")
     )
@@ -281,6 +290,7 @@ if st.session_state.get("analysis_started"):
 # ===================================================================
 st.divider()
 st.caption("Final Note: All analysis is provided by Google Gemini 2.5 Flash. Accuracy depends on audio quality.")
+
 
 
 
