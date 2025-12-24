@@ -1,4 +1,4 @@
-
+# Replace your current import block with this:
 import streamlit as st
 import tempfile
 import os
@@ -8,11 +8,12 @@ from pydub import AudioSegment
 from textblob import TextBlob
 from streamlit_mic_recorder import mic_recorder 
 
-# Import Google GenAI SDK
-try:
-    from google import genai
-    from google.genai import types
-    GEMINI_AVAILABLE = True
+# Use the NEW SDK explicitly
+from google import genai
+from google.genai import types
+
+# Define this to avoid errors in the rest of the script
+GEMINI_AVAILABLE = True
 except Exception:
     GEMINI_AVAILABLE = False
 
@@ -280,6 +281,7 @@ if st.session_state.get("analysis_started"):
 # ===================================================================
 st.divider()
 st.caption("Final Note: All analysis is provided by Google Gemini 2.5 Flash. Accuracy depends on audio quality.")
+
 
 
 
