@@ -1,4 +1,4 @@
-import google.generativeai as genai
+
 import streamlit as st
 import tempfile
 import os
@@ -280,6 +280,7 @@ if st.session_state.get("analysis_started"):
 # ===================================================================
 st.divider()
 st.caption("Final Note: All analysis is provided by Google Gemini 2.5 Flash. Accuracy depends on audio quality.")
+
 
 
 
