@@ -12,7 +12,7 @@ from google.genai import types
 # ===================================================================
 # CONFIG & SESSION STATE
 # ===================================================================
-DEFAULT_MODEL = "gemini-2.0-flash"
+DEFAULT_MODEL = "gemini-1.5-flash"
 
 st.set_page_config(
     page_title="Gemini Sales Intelligence", 
@@ -196,3 +196,4 @@ if st.session_state.analysis_results:
 
 st.divider()
 st.caption("Final Note: This analysis uses exactly 2 API calls per session.")
+
